@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import CameraCapture from "../shared/CameraCapture";
 import GPSCapture from "../shared/GPSCapture";
+import VoiceInput from "../shared/VoiceInput";
 import {
   MapPin,
   User,
@@ -11,6 +12,7 @@ import {
   AlertTriangle,
   CheckCircle,
   Loader2,
+  Mic,
 } from "lucide-react";
 import {
   validatePhone,
@@ -97,6 +99,27 @@ export default function CaseForm({ caseType, onSuccess }: CaseFormProps) {
     last_seen_location: "",
     found_person_description: "",
   });
+
+  // Voice input: merge extracted fields into form
+  const handleVoiceFields = (fields: Record<string, string>) => {
+    setFormData((prev) => {
+      const updated = { ...prev };
+      for (const [key, value] of Object.entries(fields)) {
+        if (key in updated && value) {
+          (updated as any)[key] = value;
+        }
+      }
+      return updated;
+    });
+    // Clear any validation errors for filled fields
+    setValidationErrors((prev) => {
+      const cleared = { ...prev };
+      for (const key of Object.keys(fields)) {
+        delete cleared[key];
+      }
+      return cleared;
+    });
+  };
 
   const update = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -319,6 +342,12 @@ export default function CaseForm({ caseType, onSuccess }: CaseFormProps) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Voice Input */}
+        <VoiceInput
+          caseType={caseType}
+          onFieldsExtracted={handleVoiceFields}
+        />
+
         {/* GPS */}
         <Section
           icon={<MapPin className="w-4 h-4" />}

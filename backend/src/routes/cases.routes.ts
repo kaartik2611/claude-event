@@ -4,6 +4,7 @@ import { uploadCasePhotos } from "../middleware/upload";
 import caseService from "../services/case.service";
 import matchService from "../services/match.service";
 import mlService from "../services/ml.service";
+import voiceService from "../services/voice.service";
 import { CreateCaseRequest, SearchCasesQuery } from "../types";
 import { intakeQueue } from "../queues";
 
@@ -83,6 +84,37 @@ router.post(
       res.status(500).json({ error: error.message || "Failed to create case" });
     }
   },
+);
+
+/**
+ * POST /api/cases/parse-voice
+ * Parse voice transcript and extract form fields using Claude AI
+ */
+router.post(
+  "/parse-voice",
+  authenticate,
+  async (req: AuthRequest, res) => {
+    try {
+      const { transcript, caseType } = req.body;
+
+      if (!transcript || typeof transcript !== "string") {
+        return res.status(400).json({ error: "Transcript text is required" });
+      }
+
+      if (!["lost", "searching", "found"].includes(caseType)) {
+        return res.status(400).json({ error: "Invalid case type" });
+      }
+
+      // Limit transcript length to prevent abuse
+      const trimmed = transcript.slice(0, 2000);
+
+      const fields = await voiceService.parseTranscript(trimmed, caseType);
+      res.json({ fields, transcript: trimmed });
+    } catch (error: any) {
+      console.error("Voice parse error:", error);
+      res.status(500).json({ error: error.message || "Failed to parse voice input" });
+    }
+  }
 );
 
 /**
@@ -202,5 +234,4 @@ router.get("/zone/:zone_id", authenticate, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 export default router;
