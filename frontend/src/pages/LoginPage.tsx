@@ -258,7 +258,7 @@ export default function LoginPage() {
         </div>
 
         <button
-          onClick={() => navigate('/about')}
+          onClick={() => navigate("/about")}
           className="mx-auto mt-6 flex items-center gap-1.5 text-[11px] text-gray-500 hover:text-orange-400 transition"
         >
           <Info className="w-3.5 h-3.5" /> About this project
