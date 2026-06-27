@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
-import { offlineCacheService } from '../services/offlineCache';
+import { useState, useEffect } from "react";
+import { offlineCacheService } from "../services/offlineCache";
 
 /**
  * Hook to manage offline cache state
  */
 export function useOfflineCache() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [pendingCount, setPendingCount] = useState(offlineCacheService.getPendingCount());
+  const [pendingCount, setPendingCount] = useState(
+    offlineCacheService.getPendingCount(),
+  );
   const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
@@ -19,8 +21,8 @@ export function useOfflineCache() {
       setIsOnline(false);
     };
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     // Check pending count periodically
     const interval = setInterval(() => {
@@ -28,8 +30,8 @@ export function useOfflineCache() {
     }, 1000);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
       clearInterval(interval);
     };
   }, []);

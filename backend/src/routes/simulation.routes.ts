@@ -1,7 +1,7 @@
-import express from 'express';
-import simulationService from '../services/simulation.service';
-import personTrackingService from '../services/personTracking.service';
-import { authenticate } from '../middleware/auth';
+import express from "express";
+import simulationService from "../services/simulation.service";
+import personTrackingService from "../services/personTracking.service";
+import { authenticate } from "../middleware/auth";
 
 const router = express.Router();
 
@@ -11,12 +11,12 @@ router.use(authenticate);
 /**
  * Start a new person simulation
  */
-router.post('/start', async (req, res) => {
+router.post("/start", async (req, res) => {
   try {
     const { name, age, description, photo_url } = req.body;
-    
+
     if (!name) {
-      return res.status(400).json({ error: 'Name is required' });
+      return res.status(400).json({ error: "Name is required" });
     }
 
     const person_id = await simulationService.startPersonSimulation({
@@ -32,7 +32,7 @@ router.post('/start', async (req, res) => {
       message: `Simulation started for ${name}`,
     });
   } catch (error: any) {
-    console.error('Start simulation error:', error);
+    console.error("Start simulation error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -40,10 +40,10 @@ router.post('/start', async (req, res) => {
 /**
  * Start crowd simulation (multiple people)
  */
-router.post('/crowd', async (req, res) => {
+router.post("/crowd", async (req, res) => {
   try {
     const { count = 3 } = req.body;
-    
+
     const personIds = await simulationService.simulateCrowd(count);
 
     res.json({
@@ -53,7 +53,7 @@ router.post('/crowd', async (req, res) => {
       message: `Started simulation for ${personIds.length} people`,
     });
   } catch (error: any) {
-    console.error('Crowd simulation error:', error);
+    console.error("Crowd simulation error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -61,19 +61,19 @@ router.post('/crowd', async (req, res) => {
 /**
  * Manually move a person to a zone
  */
-router.post('/move/:person_id', async (req, res) => {
+router.post("/move/:person_id", async (req, res) => {
   try {
     const { person_id } = req.params;
-    const { to_zone, detection_method = 'manual' } = req.body;
+    const { to_zone, detection_method = "manual" } = req.body;
 
     if (!to_zone) {
-      return res.status(400).json({ error: 'to_zone is required' });
+      return res.status(400).json({ error: "to_zone is required" });
     }
 
     const result = await simulationService.manuallyMovePerson(
       person_id,
       to_zone,
-      detection_method
+      detection_method,
     );
 
     res.json({
@@ -82,7 +82,7 @@ router.post('/move/:person_id', async (req, res) => {
       movement: result.movement,
     });
   } catch (error: any) {
-    console.error('Manual move error:', error);
+    console.error("Manual move error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -90,10 +90,10 @@ router.post('/move/:person_id', async (req, res) => {
 /**
  * Stop a simulation
  */
-router.post('/stop/:person_id', async (req, res) => {
+router.post("/stop/:person_id", async (req, res) => {
   try {
     const { person_id } = req.params;
-    
+
     await simulationService.stopSimulation(person_id);
 
     res.json({
@@ -101,7 +101,7 @@ router.post('/stop/:person_id', async (req, res) => {
       message: `Simulation stopped for ${person_id}`,
     });
   } catch (error: any) {
-    console.error('Stop simulation error:', error);
+    console.error("Stop simulation error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -109,7 +109,7 @@ router.post('/stop/:person_id', async (req, res) => {
 /**
  * Get all active simulations
  */
-router.get('/active', (req, res) => {
+router.get("/active", (req, res) => {
   try {
     const activeSimulations = simulationService.getActiveSimulations();
 
@@ -119,7 +119,7 @@ router.get('/active', (req, res) => {
       count: activeSimulations.length,
     });
   } catch (error: any) {
-    console.error('Get active simulations error:', error);
+    console.error("Get active simulations error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -127,7 +127,7 @@ router.get('/active', (req, res) => {
 /**
  * Get all tracked persons in a zone
  */
-router.get('/zone/:zone_id/persons', async (req, res) => {
+router.get("/zone/:zone_id/persons", async (req, res) => {
   try {
     const { zone_id } = req.params;
     const persons = await personTrackingService.getPersonsInZone(zone_id);
@@ -139,7 +139,7 @@ router.get('/zone/:zone_id/persons', async (req, res) => {
       count: persons.length,
     });
   } catch (error: any) {
-    console.error('Get persons in zone error:', error);
+    console.error("Get persons in zone error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -147,13 +147,13 @@ router.get('/zone/:zone_id/persons', async (req, res) => {
 /**
  * Get person details and movement history
  */
-router.get('/person/:person_id', async (req, res) => {
+router.get("/person/:person_id", async (req, res) => {
   try {
     const { person_id } = req.params;
-    
+
     const person = await personTrackingService.getPersonById(person_id);
     if (!person) {
-      return res.status(404).json({ error: 'Person not found' });
+      return res.status(404).json({ error: "Person not found" });
     }
 
     const movements = await personTrackingService.getPersonMovements(person_id);
@@ -165,7 +165,7 @@ router.get('/person/:person_id', async (req, res) => {
       movement_count: movements.length,
     });
   } catch (error: any) {
-    console.error('Get person error:', error);
+    console.error("Get person error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -173,7 +173,7 @@ router.get('/person/:person_id', async (req, res) => {
 /**
  * Get all active tracked persons
  */
-router.get('/persons/all', async (req, res) => {
+router.get("/persons/all", async (req, res) => {
   try {
     const persons = await personTrackingService.getAllActivePersons();
 
@@ -183,7 +183,7 @@ router.get('/persons/all', async (req, res) => {
       count: persons.length,
     });
   } catch (error: any) {
-    console.error('Get all persons error:', error);
+    console.error("Get all persons error:", error);
     res.status(500).json({ error: error.message });
   }
 });

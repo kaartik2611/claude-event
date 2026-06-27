@@ -1,5 +1,5 @@
-import { useOfflineCache } from '../../hooks/useOfflineCache';
-import { WifiOff, Wifi, CloudOff, RefreshCw } from 'lucide-react';
+import { useOfflineCache } from "../../hooks/useOfflineCache";
+import { WifiOff, Wifi, CloudOff, RefreshCw } from "lucide-react";
 
 export default function OfflineIndicator() {
   const { isOnline, pendingCount, isSyncing, syncCache } = useOfflineCache();
@@ -14,8 +14,12 @@ export default function OfflineIndicator() {
         <div className="bg-red-500/90 backdrop-blur text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 animate-pulse">
           <WifiOff className="w-5 h-5" />
           <div className="flex flex-col">
-            <span className="font-semibold text-sm">No Internet Connection</span>
-            <span className="text-xs opacity-90">Requests will be cached and synced when online</span>
+            <span className="font-semibold text-sm">
+              No Internet Connection
+            </span>
+            <span className="text-xs opacity-90">
+              Requests will be cached and synced when online
+            </span>
           </div>
           {pendingCount > 0 && (
             <div className="ml-2 bg-red-700 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -29,8 +33,12 @@ export default function OfflineIndicator() {
             <>
               <RefreshCw className="w-5 h-5 animate-spin" />
               <div className="flex flex-col">
-                <span className="font-semibold text-sm">Syncing Cached Requests...</span>
-                <span className="text-xs opacity-90">{pendingCount} requests pending</span>
+                <span className="font-semibold text-sm">
+                  Syncing Cached Requests...
+                </span>
+                <span className="text-xs opacity-90">
+                  {pendingCount} requests pending
+                </span>
               </div>
             </>
           ) : (
@@ -38,7 +46,9 @@ export default function OfflineIndicator() {
               <CloudOff className="w-5 h-5" />
               <div className="flex flex-col">
                 <span className="font-semibold text-sm">Pending Sync</span>
-                <span className="text-xs opacity-90">{pendingCount} cached requests</span>
+                <span className="text-xs opacity-90">
+                  {pendingCount} cached requests
+                </span>
               </div>
               <button
                 onClick={syncCache}

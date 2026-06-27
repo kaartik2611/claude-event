@@ -1,21 +1,21 @@
 /**
  * Offline Cache Service for Sherlock Requests
- * 
+ *
  * Caches requests when offline and syncs when back online
  */
 
 interface CachedRequest {
   id: string;
-  type: 'case' | 'update' | 'location';
+  type: "case" | "update" | "location";
   endpoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   data: any;
   timestamp: number;
   retryCount: number;
-  status: 'pending' | 'syncing' | 'synced' | 'failed';
+  status: "pending" | "syncing" | "synced" | "failed";
 }
 
-const CACHE_KEY = 'kumbh_offline_cache';
+const CACHE_KEY = "kumbh_offline_cache";
 const MAX_RETRY = 3;
 
 class OfflineCacheService {
@@ -39,7 +39,7 @@ class OfflineCacheService {
         console.log(`📦 Loaded ${this.cache.length} cached requests`);
       }
     } catch (error) {
-      console.error('Failed to load cache:', error);
+      console.error("Failed to load cache:", error);
       this.cache = [];
     }
   }
@@ -51,7 +51,7 @@ class OfflineCacheService {
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify(this.cache));
     } catch (error) {
-      console.error('Failed to save cache:', error);
+      console.error("Failed to save cache:", error);
     }
   }
 
@@ -59,14 +59,14 @@ class OfflineCacheService {
    * Setup online/offline event listeners
    */
   private setupEventListeners() {
-    window.addEventListener('online', () => {
-      console.log('🌐 Network back online!');
+    window.addEventListener("online", () => {
+      console.log("🌐 Network back online!");
       this.isOnline = true;
       this.syncCachedRequests();
     });
 
-    window.addEventListener('offline', () => {
-      console.log('📴 Network went offline!');
+    window.addEventListener("offline", () => {
+      console.log("📴 Network went offline!");
       this.isOnline = false;
     });
   }
@@ -75,9 +75,9 @@ class OfflineCacheService {
    * Add request to cache
    */
   addToCache(request: {
-    type: 'case' | 'update' | 'location';
+    type: "case" | "update" | "location";
     endpoint: string;
-    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     data: any;
   }): string {
     const cachedRequest: CachedRequest = {
@@ -85,7 +85,7 @@ class OfflineCacheService {
       ...request,
       timestamp: Date.now(),
       retryCount: 0,
-      status: 'pending',
+      status: "pending",
     };
 
     this.cache.push(cachedRequest);
@@ -112,7 +112,7 @@ class OfflineCacheService {
    * Get pending requests count
    */
   getPendingCount(): number {
-    return this.cache.filter(r => r.status === 'pending').length;
+    return this.cache.filter((r) => r.status === "pending").length;
   }
 
   /**
@@ -126,24 +126,25 @@ class OfflineCacheService {
     this.syncInProgress = true;
     console.log(`🔄 Syncing ${this.cache.length} cached requests...`);
 
-    const pendingRequests = this.cache.filter(r => r.status === 'pending');
+    const pendingRequests = this.cache.filter((r) => r.status === "pending");
 
     for (const request of pendingRequests) {
       try {
-        request.status = 'syncing';
+        request.status = "syncing";
         this.saveCache();
 
         const response = await fetch(request.endpoint, {
           method: request.method,
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: request.method !== 'GET' ? JSON.stringify(request.data) : undefined,
+          body:
+            request.method !== "GET" ? JSON.stringify(request.data) : undefined,
         });
 
         if (response.ok) {
-          request.status = 'synced';
+          request.status = "synced";
           console.log(`✅ Synced request ${request.id}`);
         } else {
           throw new Error(`HTTP ${response.status}`);
@@ -153,10 +154,12 @@ class OfflineCacheService {
         request.retryCount++;
 
         if (request.retryCount >= MAX_RETRY) {
-          request.status = 'failed';
-          console.error(`🚫 Request ${request.id} failed after ${MAX_RETRY} retries`);
+          request.status = "failed";
+          console.error(
+            `🚫 Request ${request.id} failed after ${MAX_RETRY} retries`,
+          );
         } else {
-          request.status = 'pending';
+          request.status = "pending";
         }
       }
 
@@ -164,11 +167,13 @@ class OfflineCacheService {
     }
 
     // Clean up synced requests (keep failed ones for inspection)
-    this.cache = this.cache.filter(r => r.status !== 'synced');
+    this.cache = this.cache.filter((r) => r.status !== "synced");
     this.saveCache();
 
     this.syncInProgress = false;
-    console.log(`✅ Sync complete. ${this.cache.length} requests remaining in cache.`);
+    console.log(
+      `✅ Sync complete. ${this.cache.length} requests remaining in cache.`,
+    );
   }
 
   /**
@@ -177,14 +182,14 @@ class OfflineCacheService {
   clearCache() {
     this.cache = [];
     this.saveCache();
-    console.log('🗑️ Cache cleared');
+    console.log("🗑️ Cache cleared");
   }
 
   /**
    * Clear only synced requests
    */
   clearSyncedRequests() {
-    this.cache = this.cache.filter(r => r.status !== 'synced');
+    this.cache = this.cache.filter((r) => r.status !== "synced");
     this.saveCache();
   }
 
@@ -192,12 +197,12 @@ class OfflineCacheService {
    * Retry a failed request
    */
   async retryRequest(requestId: string): Promise<boolean> {
-    const request = this.cache.find(r => r.id === requestId);
+    const request = this.cache.find((r) => r.id === requestId);
     if (!request) {
       return false;
     }
 
-    request.status = 'pending';
+    request.status = "pending";
     request.retryCount = 0;
     this.saveCache();
 
@@ -220,7 +225,7 @@ export const offlineCacheService = new OfflineCacheService();
  */
 export async function cachedFetch(
   url: string,
-  options: RequestInit & { cacheType?: 'case' | 'update' | 'location' } = {}
+  options: RequestInit & { cacheType?: "case" | "update" | "location" } = {},
 ): Promise<Response> {
   const { cacheType, ...fetchOptions } = options;
 
@@ -230,12 +235,12 @@ export async function cachedFetch(
       const response = await fetch(url, fetchOptions);
       return response;
     } catch (error) {
-      console.warn('Fetch failed, falling back to cache:', error);
+      console.warn("Fetch failed, falling back to cache:", error);
     }
   }
 
   // If offline or fetch failed, cache the request
-  if (cacheType && fetchOptions.method && fetchOptions.method !== 'GET') {
+  if (cacheType && fetchOptions.method && fetchOptions.method !== "GET") {
     offlineCacheService.addToCache({
       type: cacheType,
       endpoint: url,
@@ -248,14 +253,14 @@ export async function cachedFetch(
       JSON.stringify({
         success: true,
         cached: true,
-        message: 'Request cached and will sync when online',
+        message: "Request cached and will sync when online",
       }),
       {
         status: 202, // Accepted
-        headers: { 'Content-Type': 'application/json' },
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 
-  throw new Error('Network unavailable and request cannot be cached');
+  throw new Error("Network unavailable and request cannot be cached");
 }
