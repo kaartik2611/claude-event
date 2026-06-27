@@ -1,0 +1,15 @@
+source_file,placemark_id,name,description,geometry_type,longitude,latitude,altitude,coordinates,lookat_longitude,lookat_latitude,lookat_altitude,lookat_heading,lookat_tilt,lookat_range,gx_mid,gx_fid
+Police Stations.kml,56E987DEA3000001,Adgaon Police station,,Point,73.82694499999999,20.015486,0,"73.82694499999999,20.015486,0",,,,,,,,
+Police Stations.kml,56E987DEA3000002,AmbadPolice station,,Point,73.763443,19.96586,0,"73.763443,19.96586,0",,,,,,,,
+Police Stations.kml,56E987DEA3000003,Bhadrakali Police station,,Point,73.789208,19.997799,0,"73.789208,19.997799,0",,,,,,,,
+Police Stations.kml,56E987DEA3000004,Devlali camp Police station,,Point,73.82685499999999,19.905098,0,"73.82685499999999,19.905098,0",,,,,,,,
+Police Stations.kml,56E987DEA3000005,Gangapur Police station,,Point,73.75006999999999,20.014267,0,"73.75006999999999,20.014267,0",,,,,,,,
+Police Stations.kml,56E987DEA3000006,Indiranagar Police station,,Point,73.778583,19.974576,0,"73.778583,19.974576,0",,,,,,,,
+Police Stations.kml,56E987DEA3000007,Mhasrul Police station,,Point,73.80238799999999,20.032542,0,"73.80238799999999,20.032542,0",,,,,,,,
+Police Stations.kml,56E987DEA3000008,Mumbai naka Police station,,Point,73.783917,19.987591,0,"73.783917,19.987591,0",,,,,,,,
+Police Stations.kml,56E987DEA300000A,Panchavati Police station,,Point,73.796739,20.015643,0,"73.796739,20.015643,0",,,,,,,,
+Police Stations.kml,56E987DEA300000B,Sarkarwada Police station,,Point,73.77977199999999,20.00562,0,"73.77977199999999,20.00562,0",,,,,,,,
+Police Stations.kml,56E987DEA300000C,Satpur Police station,,Point,73.742909,19.991434,0,"73.742909,19.991434,0",,,,,,,,
+Police Stations.kml,56E987DEA300000D,Upnagar Police station,,Point,73.82440200000001,19.967381,0,"73.82440200000001,19.967381,0",,,,,,,,
+Police Stations.kml,0E8DF2B62B3A0BDA3A9B,Nashik Road Police Station,,Point,73.83973659999999,19.9528351,0,"73.83973659999999,19.9528351,0",73.83973659999999,19.9528351,0,0,0,985.9755193596785,/g/1pyqvb8rw,0x3bdd95567a34b8e7:0xdaeb8710549f8e81
+Police Stations.kml,050702C4993A0BDAE630,MIDC Chunchale police chowki,,Point,73.73680179999999,19.9506575,0,"73.73680179999999,19.9506575,0",73.73674249999999,19.9506047,0,0,0,985.9910342169638,/g/11ydjgq5vb,0x3bdded006cb13bef:0xe4e5734138898aa7
