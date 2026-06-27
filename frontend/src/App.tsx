@@ -6,6 +6,7 @@ import SherlockDashboard from "./pages/sherlock/SherlockDashboard";
 import PoliceDashboard from "./pages/police/PoliceDashboard";
 import CentralDashboard from "./pages/central/CentralDashboard";
 import SimulationDashboard from "./pages/central/SimulationDashboard";
+import AboutPage from "./pages/AboutPage";
 
 // Components
 import OfflineIndicator from "./components/shared/OfflineIndicator";
@@ -48,6 +49,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/about" element={<AboutPage />} />
 
       <Route
         path="/sherlock"

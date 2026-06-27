@@ -271,7 +271,13 @@ export default function CaseForm({ caseType, onSuccess }: CaseFormProps) {
         throw new Error(result.error || "Failed to submit case");
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to submit case");
+      console.error("❌ Submission error:", err);
+      // Handle different error types
+      if (err.message === "Failed to fetch") {
+        setError("🔌 Cannot connect to server. Please ensure the backend is running.");
+      } else {
+        setError(err.message || "Failed to submit case");
+      }
     } finally {
       setLoading(false);
     }

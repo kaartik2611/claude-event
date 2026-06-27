@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Eye, EyeOff, LogIn, Shield, Radio, Search } from "lucide-react";
+import { Eye, EyeOff, LogIn, Shield, Radio, Search, Info } from "lucide-react";
 import { validatePhone, formatPhone } from "../utils/validation";
 
 const roles = [
@@ -257,7 +257,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <p className="text-center text-[10px] text-gray-700 mt-6">
+        <button
+          onClick={() => navigate('/about')}
+          className="mx-auto mt-6 flex items-center gap-1.5 text-[11px] text-gray-500 hover:text-orange-400 transition"
+        >
+          <Info className="w-3.5 h-3.5" /> About this project
+        </button>
+        <p className="text-center text-[10px] text-gray-700 mt-2">
           Claude Impact Lab · Kumbhathon Foundation · Govt. of Maharashtra
         </p>
       </div>
