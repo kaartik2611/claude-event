@@ -3,7 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import CameraCapture from '../shared/CameraCapture';
 import GPSCapture from '../shared/GPSCapture';
-import { MapPin, User, Search, UserCheck, Camera, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
+import { cachedFetch } from '../../services/offlineCache';
+import { MapPin, User, Search, UserCheck, Camera, AlertTriangle, CheckCircle, Loader2, WifiOff } from 'lucide-react';
 
 interface CaseFormProps {
   caseType: 'lost' | 'searching' | 'found';
@@ -77,11 +78,31 @@ export default function CaseForm({ caseType, onSuccess }: CaseFormProps) {
         fd.append('found_person_description', formData.found_person_description);
         if (foundPersonPhoto) fd.append('found_person_photo', foundPersonPhoto);
       }
+// Use offline-aware fetch
+      const response = await fetch('/api/cases', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: fd,
+      });
 
-      await axios.post('/api/cases', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setSuccess(true);
-      setTimeout(() => onSuccess(), 2000);
+      const result = await response.json();
+      
+      if (response.status === 202 && result.cached) {
+        // Request was cached offline
+        setSuccess(true);
+        setError('📴 Offline mode: Request cached and will sync when online');
+        setTimeout(() => onSuccess(), 3000);
+      } else if (response.ok) {
+        // Request successful
+        setSuccess(true);
+        setTimeout(() => onSuccess(), 2000);
+      } else {
+        throw new Error(result.error || 'Failed to submit case');
+      }
     } catch (err: any) {
+      setError(err.message
       setError(err.response?.data?.error || 'Failed to submit case');
     } finally {
       setLoading(false);

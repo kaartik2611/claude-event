@@ -248,6 +248,48 @@ CREATE INDEX idx_dispatches_case ON dispatches(case_id);
 CREATE INDEX idx_dispatches_station ON dispatches(station_id);
 CREATE INDEX idx_dispatches_status ON dispatches(status);
 
+-- 10. TRACKED PERSONS TABLE (for zone-to-zone movement simulation)
+CREATE TABLE IF NOT EXISTS tracked_persons (
+    person_id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(100),
+    age INTEGER,
+    description TEXT,
+    photo_url TEXT,
+    current_zone VARCHAR(50) REFERENCES zones(zone_id),
+    current_gps_lat DECIMAL(10, 7),
+    current_gps_lng DECIMAL(10, 7),
+    current_gps_point GEOGRAPHY(POINT, 4326),
+    status VARCHAR(20) DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'resolved')),
+    last_detection_time TIMESTAMP DEFAULT NOW(),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_tracked_persons_zone ON tracked_persons(current_zone);
+CREATE INDEX idx_tracked_persons_status ON tracked_persons(status);
+CREATE INDEX idx_tracked_persons_gps ON tracked_persons USING GIST(current_gps_point);
+
+-- 11. PERSON MOVEMENT HISTORY TABLE
+CREATE TABLE IF NOT EXISTS person_movements (
+    movement_id SERIAL PRIMARY KEY,
+    person_id VARCHAR(50) REFERENCES tracked_persons(person_id) ON DELETE CASCADE,
+    from_zone VARCHAR(50) REFERENCES zones(zone_id),
+    to_zone VARCHAR(50) REFERENCES zones(zone_id),
+    from_lat DECIMAL(10, 7),
+    from_lng DECIMAL(10, 7),
+    to_lat DECIMAL(10, 7),
+    to_lng DECIMAL(10, 7),
+    detection_method VARCHAR(50) DEFAULT 'cctv' CHECK(detection_method IN ('cctv', 'manual', 'sherlock', 'simulated')),
+    detection_source VARCHAR(100),
+    confidence_score DECIMAL(4, 2),
+    moved_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_person_movements_person ON person_movements(person_id);
+CREATE INDEX idx_person_movements_from_zone ON person_movements(from_zone);
+CREATE INDEX idx_person_movements_to_zone ON person_movements(to_zone);
+CREATE INDEX idx_person_movements_time ON person_movements(moved_at DESC);
+
 -- 10. ADMIN USERS TABLE
 CREATE TABLE IF NOT EXISTS admin_users (
     admin_id VARCHAR(50) PRIMARY KEY,

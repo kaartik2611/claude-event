@@ -10,6 +10,7 @@ import './queues'; // Initialize queues
 import authRoutes from './routes/auth.routes';
 import casesRoutes from './routes/cases.routes';
 import analyticsRoutes from './routes/analytics.routes';
+import simulationRoutes from './routes/simulation.routes';
 
 const app = express();
 const httpServer = createServer(app);
@@ -29,6 +30,7 @@ export { io };
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cases', casesRoutes);
+app.use('/api/simulation', simulationRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
 // Health check

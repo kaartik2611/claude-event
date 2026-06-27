@@ -6,6 +6,10 @@ import sherlockService from '../services/sherlock.service';
 
 let io: SocketIOServer | null = null;
 
+export const getSocketInstance = (): SocketIOServer | null => {
+  return io;
+};
+
 export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
   io = new SocketIOServer(httpServer, {
     cors: {
@@ -67,6 +71,17 @@ export const initializeSocket = (httpServer: HTTPServer): SocketIOServer => {
     
     socket.on('case:unsubscribe', (case_id: string) => {
       socket.leave(`case:${case_id}`);
+    });
+    
+    // Zone tracking subscription (for simulation)
+    socket.on('zone-tracking:subscribe', () => {
+      socket.join('zone-tracking');
+      console.log(`🎯 ${user.id} subscribed to zone tracking`);
+    });
+    
+    socket.on('zone-tracking:unsubscribe', () => {
+      socket.leave('zone-tracking');
+      console.log(`🎯 ${user.id} unsubscribed from zone tracking`);
     });
     
     // Sherlock heartbeat (location updates)

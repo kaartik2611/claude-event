@@ -6,6 +6,10 @@ import LoginPage from './pages/LoginPage';
 import SherlockDashboard from './pages/sherlock/SherlockDashboard';
 import PoliceDashboard from './pages/police/PoliceDashboard';
 import CentralDashboard from './pages/central/CentralDashboard';
+import SimulationDashboard from './pages/central/SimulationDashboard';
+
+// Components
+import OfflineIndicator from './components/shared/OfflineIndicator';
 
 // Context
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -55,6 +59,12 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      <Route path="/simulation" element={
+        <ProtectedRoute role="admin">
+          <SimulationDashboard />
+        </ProtectedRoute>
+      } />
+      
       <Route path="/" element={
         user ? (
           user.role === 'sherlock' ? <Navigate to="/sherlock" /> :
@@ -73,6 +83,7 @@ function App() {
     <AuthProvider>
       <div className="min-h-screen bg-gray-50">
         <AppRoutes />
+        <OfflineIndicator />
       </div>
     </AuthProvider>
   );
