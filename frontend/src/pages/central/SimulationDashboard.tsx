@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { Users, Play, Square, MapPin, ArrowRight, Activity, ArrowLeft } from 'lucide-react';
+import { Users, Play, MapPin, ArrowRight, Activity, ArrowLeft } from 'lucide-react';
 
 interface TrackedPerson {
   person_id: string;
@@ -33,7 +33,7 @@ const ZONES: Zone[] = [
 
 export default function SimulationDashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [zones, setZones] = useState<Zone[]>(ZONES);
   const [isSimulating, setIsSimulating] = useState(false);

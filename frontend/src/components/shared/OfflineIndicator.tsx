@@ -1,5 +1,5 @@
 import { useOfflineCache } from "../../hooks/useOfflineCache";
-import { WifiOff, Wifi, CloudOff, RefreshCw } from "lucide-react";
+import { WifiOff, CloudOff, RefreshCw } from "lucide-react";
 
 export default function OfflineIndicator() {
   const { isOnline, pendingCount, isSyncing, syncCache } = useOfflineCache();

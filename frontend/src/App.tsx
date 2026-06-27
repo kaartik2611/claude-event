@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 
 // Pages
 import LoginPage from "./pages/LoginPage";
@@ -10,6 +9,7 @@ import SimulationDashboard from "./pages/central/SimulationDashboard";
 
 // Components
 import OfflineIndicator from "./components/shared/OfflineIndicator";
+import { PWAUpdatePrompt } from "./components/shared/PWAUpdatePrompt";
 
 // Context
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -111,6 +111,7 @@ function App() {
       <div className="min-h-screen bg-gray-50">
         <AppRoutes />
         <OfflineIndicator />
+        <PWAUpdatePrompt />
       </div>
     </AuthProvider>
   );

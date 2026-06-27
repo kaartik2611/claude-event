@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
 import CameraCapture from '../shared/CameraCapture';
 import GPSCapture from '../shared/GPSCapture';
-import { cachedFetch } from '../../services/offlineCache';
-import { MapPin, User, Search, UserCheck, Camera, AlertTriangle, CheckCircle, Loader2, WifiOff } from 'lucide-react';
+import { MapPin, User, Search, UserCheck, Camera, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
 
 interface CaseFormProps {
   caseType: 'lost' | 'searching' | 'found';
@@ -18,7 +16,7 @@ const caseConfig = {
 };
 
 export default function CaseForm({ caseType, onSuccess }: CaseFormProps) {
-  const { user } = useAuth();
+  useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
