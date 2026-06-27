@@ -9,6 +9,7 @@ import './queues'; // Initialize queues
 // Routes
 import authRoutes from './routes/auth.routes';
 import casesRoutes from './routes/cases.routes';
+import analyticsRoutes from './routes/analytics.routes';
 
 const app = express();
 const httpServer = createServer(app);
@@ -28,6 +29,7 @@ export { io };
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cases', casesRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check
 app.get('/health', async (req, res) => {
