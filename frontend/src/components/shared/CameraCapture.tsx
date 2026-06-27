@@ -22,46 +22,100 @@ export default function CameraCapture({
   const startCamera = async () => {
     try {
       setError(null);
-      let stream: MediaStream | null = null;
+      console.log("🎥 Starting camera...");
+      console.log("📱 User Agent:", navigator.userAgent);
       
-      // Try back camera first (for mobile)
+      // Check if getUserMedia is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        console.error("❌ getUserMedia not supported");
+        throw new Error("Camera not supported on this device/browser");
+      }
+
+      console.log("✅ getUserMedia is supported");
+      let stream: MediaStream | null = null;
+
+      // Try back camera first (for mobile) with mobile-friendly constraints
       try {
+        console.log("📱 Attempting to access back camera (mobile)...");
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { ideal: "environment" },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
+            width: { ideal: 1280, max: 1920 },
+            height: { ideal: 720, max: 1080 },
           },
           audio: false,
         });
+        console.log("✅ Back camera accessed successfully");
       } catch (backCameraError) {
-        console.log("Back camera not available, trying front camera or default");
-        // Fallback to any available camera (for desktop)
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
-        });
+        console.log("⚠️ Back camera not available, trying any camera...", backCameraError);
+        // Fallback to any available camera (for desktop or if back camera fails)
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 1280, max: 1920 },
+              height: { ideal: 720, max: 1080 },
+            },
+            audio: false,
+          });
+          console.log("✅ Front/default camera accessed successfully");
+        } catch (fallbackError) {
+          console.log("⚠️ Trying with minimal constraints...");
+          // Last resort - minimal constraints for older devices
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: true,
+              audio: false,
+            });
+            console.log("✅ Camera accessed with basic constraints");
+          } catch (minimalError) {
+            console.error("❌ All camera access attempts failed:", minimalError);
+            throw minimalError; // Re-throw to be caught by outer catch
+          }
+        }
       }
 
-      if (stream && videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-        setCameraActive(true);
+      if (!stream) {
+        console.error("❌ No camera stream obtained");
+        throw new Error("Failed to obtain camera stream. Please ensure camera permissions are granted.");
       }
+
+      console.log("📹 Camera stream obtained successfully");
+      // Store stream and activate camera view (which will render the video element)
+      streamRef.current = stream;
+      setCameraActive(true);
+      
     } catch (err: any) {
-      console.error("Camera error:", err);
+      console.error("❌ Camera error:", err);
       setError(
         err.name === "NotAllowedError"
           ? "Camera permission denied. Please allow camera access in your browser settings."
           : err.name === "NotFoundError"
-          ? "No camera found. Please connect a camera to use this feature."
-          : "Unable to access camera. Please check permissions and try again.",
+            ? "No camera found on this device."
+            : `Camera error: ${err.message || 'Unknown error'}. Please try again.`
       );
     }
   };
+
+  // Effect to attach stream to video element once it's rendered
+  useEffect(() => {
+    if (cameraActive && streamRef.current && videoRef.current) {
+      console.log("🎬 Video element now available, attaching stream");
+      videoRef.current.srcObject = streamRef.current;
+      
+      console.log("⏳ Waiting for video metadata to load...");
+      
+      // Wait for video to be ready (important for mobile)
+      videoRef.current.onloadedmetadata = () => {
+        console.log("📹 Video metadata loaded");
+        videoRef.current?.play().then(() => {
+          console.log("▶️ Video playing successfully");
+        }).catch(err => {
+          console.error("❌ Error playing video:", err);
+          setError("Failed to start video preview. Please try again.");
+        });
+      };
+    }
+  }, [cameraActive]);
 
   const stopCamera = () => {
     if (streamRef.current) {
@@ -72,49 +126,104 @@ export default function CameraCapture({
   };
 
   const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
 
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(video, 0, 0);
+    if (!video || !canvas) {
+      console.error("❌ Video or canvas ref not available");
+      setError("Camera not initialized. Please try again.");
+      return;
+    }
 
-        canvas.toBlob(
-          (blob) => {
-            if (blob) {
-              const file = new File([blob], `photo-${Date.now()}.jpg`, {
-                type: "image/jpeg",
-              });
-              // Store the file and preview, but don't upload yet
-              setCapturedFile(file);
-              setPreview(canvas.toDataURL("image/jpeg"));
+    // Check if video is ready
+    if (!video.videoWidth || !video.videoHeight) {
+      console.error("❌ Video not ready");
+      setError("Camera not ready. Please wait a moment and try again.");
+      return;
+    }
+      
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    console.log("📹 Capturing photo:", video.videoWidth, "x", video.videoHeight);
+
+    const ctx = canvas.getContext("2d", { willReadFrequently: false });
+    if (ctx) {
+      // Draw image to canvas
+      ctx.drawImage(video, 0, 0);
+
+      // Mobile-optimized compression
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const quality = isMobile ? 0.7 : 0.85; // More aggressive compression on mobile
+      
+      console.log(`📱 Device type: ${isMobile ? 'Mobile' : 'Desktop'}, quality: ${quality}`);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            console.log("✅ Blob created:", blob.size, "bytes", `(${(blob.size / 1024).toFixed(1)} KB)`);
+            
+            // Warn if file is very large (might fail on mobile)
+            if (blob.size > 5 * 1024 * 1024) { // 5MB
+              console.warn("⚠️ Large file size detected:", blob.size, "bytes");
+            }
+            
+            const file = new File([blob], `photo-${Date.now()}.jpg`, {
+              type: "image/jpeg",
+            });
+            console.log("📁 File created:", file.name, file.size, "bytes");
+            
+            // Store the file and preview
+            setCapturedFile(file);
+            
+            try {
+              const dataUrl = canvas.toDataURL("image/jpeg", quality);
+              setPreview(dataUrl);
+              console.log("🖼️ Preview set, length:", dataUrl.length, "chars");
+              stopCamera();
+            } catch (e) {
+              console.error("❌ Error creating preview:", e);
+              // Still set the file even if preview fails
+              setPreview(URL.createObjectURL(blob));
               stopCamera();
             }
-          },
-          "image/jpeg",
-          0.9,
-        );
-      }
+          } else {
+            console.error("❌ Failed to create blob from canvas");
+            setError("Failed to capture photo. Please try again.");
+          }
+        },
+        "image/jpeg",
+        quality
+      );
+    } else {
+      console.error("❌ Failed to get canvas context");
+      setError("Failed to initialize photo capture. Please try again.");
     }
   };
 
   const handleConfirm = () => {
     if (capturedFile) {
+      console.log("📸 Confirming photo upload:", capturedFile);
       setIsUploading(true);
+      setError(null);
+      
       try {
-        // Pass the file to parent component
+        // Pass the file to parent component BEFORE clearing state
         onCapture(capturedFile);
-        // Clear the captured file to show success state
-        setCapturedFile(null);
-        setIsUploading(false);
+        console.log("✅ Photo passed to parent successfully");
+        
+        // Use setTimeout to ensure state updates after onCapture completes
+        setTimeout(() => {
+          setCapturedFile(null);
+          setIsUploading(false);
+        }, 100);
       } catch (error) {
-        console.error("Error passing file:", error);
+        console.error("❌ Error passing file:", error);
         setError("Failed to process photo. Please try again.");
         setIsUploading(false);
       }
+    } else {
+      console.warn("⚠️ No captured file to confirm");
+      setError("No photo captured. Please take a photo first.");
     }
   };
 
@@ -129,6 +238,25 @@ export default function CameraCapture({
     setPreview(null);
     setCapturedFile(null);
     setError(null);
+  };
+
+  // File input fallback for devices where camera doesn't work
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      console.log("📁 File selected from input:", file.name, file.size, "bytes");
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setPreview(event.target?.result as string);
+        setCapturedFile(file);
+        console.log("🖼️ Preview created from file input");
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setError("Please select a valid image file");
+    }
   };
 
   useEffect(() => {
@@ -151,7 +279,9 @@ export default function CameraCapture({
           </div>
           {error.includes("permission") && (
             <div className="ml-6 mt-2 text-xs text-gray-400 space-y-1">
-              <p className="font-semibold text-gray-300">How to enable camera:</p>
+              <p className="font-semibold text-gray-300">
+                How to enable camera:
+              </p>
               <ul className="list-disc list-inside space-y-0.5 ml-2">
                 <li>Click the camera/lock icon in the address bar</li>
                 <li>Allow camera access for this site</li>
@@ -163,7 +293,7 @@ export default function CameraCapture({
       )}
 
       {!preview && !cameraActive ? (
-        <div>
+        <div className="space-y-2">
           <button
             type="button"
             onClick={startCamera}
@@ -173,10 +303,32 @@ export default function CameraCapture({
               <Camera className="w-5 h-5 text-gray-500 group-hover:text-kumbh-orange transition" />
             </div>
             <div className="text-left">
-              <p className="text-sm text-gray-300 font-medium">Take Photo</p>
-              <p className="text-[10px] text-gray-600">Camera will open</p>
+              <p className="text-sm text-gray-300 font-medium">📸 Take Photo</p>
+              <p className="text-[10px] text-gray-600">Click to open camera</p>
             </div>
           </button>
+          
+          {/* File upload fallback */}
+          <div className="relative">
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileSelect}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              id={`file-input-${label.replace(/\s+/g, '-')}`}
+            />
+            <label
+              htmlFor={`file-input-${label.replace(/\s+/g, '-')}`}
+              className="block w-full text-center px-4 py-2 border border-gray-700 rounded-lg hover:bg-gray-800/50 transition cursor-pointer"
+            >
+              <p className="text-xs text-gray-400">Or choose from gallery</p>
+            </label>
+          </div>
+          
+          <p className="text-xs text-gray-500 text-center">
+            💡 Ensure good lighting and clear image for better matching
+          </p>
         </div>
       ) : cameraActive ? (
         <div className="relative rounded-xl overflow-hidden border border-gray-700 bg-black">
@@ -184,9 +336,16 @@ export default function CameraCapture({
             ref={videoRef}
             autoPlay
             playsInline
+            muted
             className="w-full h-64 object-cover"
+            style={{ transform: 'scaleX(1)' }}
           />
           <canvas ref={canvasRef} className="hidden" />
+          <div className="absolute top-0 inset-x-0 p-2 bg-gradient-to-b from-black/60 to-transparent">
+            <p className="text-xs text-white/90 text-center font-medium">
+              📷 Position the subject in frame and click Capture
+            </p>
+          </div>
           <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-center gap-3">
             <button
               type="button"
@@ -215,7 +374,11 @@ export default function CameraCapture({
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <span className="absolute top-2 left-2 text-xs text-white/90 bg-black/60 backdrop-blur-sm px-3 py-1 rounded-lg font-medium">
-              {isUploading ? "Processing..." : capturedFile ? "Photo Ready" : "Photo Captured"}
+              {isUploading
+                ? "Processing..."
+                : capturedFile
+                  ? "Photo Ready"
+                  : "Photo Captured"}
             </span>
           </div>
 
@@ -250,7 +413,9 @@ export default function CameraCapture({
                 <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
                   <Check className="w-4 h-4 text-green-400" />
                 </div>
-                <span className="text-sm text-green-400 font-medium">Photo confirmed successfully</span>
+                <span className="text-sm text-green-400 font-medium">
+                  Photo confirmed successfully
+                </span>
               </div>
               <button
                 type="button"
@@ -267,7 +432,9 @@ export default function CameraCapture({
           {isUploading && (
             <div className="flex items-center justify-center gap-2 p-3 bg-kumbh-orange/10 border border-kumbh-orange/30 rounded-xl">
               <div className="w-4 h-4 border-2 border-kumbh-orange border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm text-kumbh-orange font-medium">Processing photo...</span>
+              <span className="text-sm text-kumbh-orange font-medium">
+                Processing photo...
+              </span>
             </div>
           )}
         </div>
