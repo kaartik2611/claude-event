@@ -1,0 +1,41 @@
+{
+  "name": "kumbh-mela-backend",
+  "version": "1.0.0",
+  "description": "Kumbh Mela Missing Person Response System - Backend",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "seed": "tsx src/scripts/seed-dataset.ts",
+    "seed:simple": "tsx src/scripts/simple-seed.ts",
+    "db:setup": "docker exec -i kumbh-postgres psql -U kumbh -d kumbh_mela < src/db/schema.sql"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "pg": "^8.13.0",
+    "ioredis": "^5.4.1",
+    "bullmq": "^5.12.0",
+    "socket.io": "^4.7.5",
+    "csv-parse": "^5.5.6",
+    "dotenv": "^16.4.5",
+    "uuid": "^10.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcrypt": "^5.1.1",
+    "multer": "^1.4.5-lts.1",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/pg": "^8.11.6",
+    "@types/uuid": "^10.0.0",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/bcrypt": "^5.0.2",
+    "@types/multer": "^1.4.11",
+    "@types/xml2js": "^0.4.14",
+    "tsx": "^4.16.0"
+  }
+}
