@@ -102,7 +102,6 @@ export default function CaseForm({ caseType, onSuccess }: CaseFormProps) {
         throw new Error(result.error || 'Failed to submit case');
       }
     } catch (err: any) {
-      setError(err.message
       setError(err.response?.data?.error || 'Failed to submit case');
     } finally {
       setLoading(false);

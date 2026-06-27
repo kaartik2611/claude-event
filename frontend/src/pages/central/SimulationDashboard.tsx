@@ -177,21 +177,20 @@ export default function SimulationDashboard() {
   return (
     <div className="min-h-screen bg-gray-950 text-white p-6">
       {/* Header */}
-      <div cla className="flex items-center gap-4">
-            <button 
-              onClick={() => navigate('/central')}
-              className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Zone Movement Simulation</h1>
-              <p className="text-gray-400">Real-time person tracking across zones</p>
-            </div
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate('/central')}
+            className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
             <h1 className="text-3xl font-bold mb-2">Zone Movement Simulation</h1>
             <p className="text-gray-400">Real-time person tracking across zones</p>
           </div>
-          <div className="flex gap-3">
+        </div>
+        <div className="flex gap-3">
             <button
               onClick={startSinglePerson}
               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
@@ -207,19 +206,18 @@ export default function SimulationDashboard() {
               <Play className="w-4 h-4" />
               Start Crowd Simulation
             </button>
-          </div>
         </div>
+      </div>
 
-        {/* Status */}
-        <div className="flex items-center gap-3 text-sm">
-          <div className="flex items-center gap-2 bg-gray-800 px-3 py-1.5 rounded-lg">
-            <Activity className={`w-4 h-4 ${socket?.connected ? 'text-green-400 animate-pulse' : 'text-gray-500'}`} />
-            <span>{socket?.connected ? 'Connected' : 'Disconnected'}</span>
-          </div>
-          <div className="flex items-center gap-2 bg-gray-800 px-3 py-1.5 rounded-lg">
-            <Users className="w-4 h-4 text-blue-400" />
-            <span>Total: {zones.reduce((acc, zone) => acc + zone.persons.length, 0)} persons</span>
-          </div>
+      {/* Status */}
+      <div className="flex items-center gap-3 text-sm mb-6">
+        <div className="flex items-center gap-2 bg-gray-800 px-3 py-1.5 rounded-lg">
+          <Activity className={`w-4 h-4 ${socket?.connected ? 'text-green-400 animate-pulse' : 'text-gray-500'}`} />
+          <span>{socket?.connected ? 'Connected' : 'Disconnected'}</span>
+        </div>
+        <div className="flex items-center gap-2 bg-gray-800 px-3 py-1.5 rounded-lg">
+          <Users className="w-4 h-4 text-blue-400" />
+          <span>Total: {zones.reduce((acc, zone) => acc + zone.persons.length, 0)} persons</span>
         </div>
       </div>
 

@@ -9,8 +9,8 @@ import {
   Eye, EyeOff, Zap, Map as MapIcon, Play
 } from 'lucide-react';
 
-export default function Central
-  const navigate = useNavigate();Dashboard() {
+export default function CentralDashboard() {
+  const navigate = useNavigate();
   const { logout } = useAuth();
   const [stats, setStats] = useState<any>(null);
   const [, setLoading] = useState(true);
@@ -68,15 +68,15 @@ export default function Central
               <h1 className="text-lg font-bold tracking-tight">Kumbh Mela Command Center</h1>
               <p className="text-xs text-gray-500">Nashik-Trimbakeshwar 2027 &middot; Live Operations</p>
             </div>
-          </dbutton 
+          </div>
+          <div className="flex items-center gap-3">
+            <button 
               onClick={() => navigate('/simulation')}
               className="flex items-center gap-2 bg-gradient-to-r from-kumbh-orange to-kumbh-gold text-white text-xs font-semibold px-4 py-2 rounded-lg hover:shadow-lg transition"
             >
               <Play className="w-3.5 h-3.5" />
               Zone Simulation
             </button>
-            <iv>
-          <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-400 bg-emerald-400/10 px-3 py-1.5 rounded-full border border-emerald-400/20">
               <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" /> LIVE
             </span>
