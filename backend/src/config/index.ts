@@ -26,7 +26,7 @@ export const config = {
   // Claude API
   claude: {
     apiKey: process.env.CLAUDE_API_KEY || '',
-    model: 'claude-3-haiku-20240307',
+    model: 'claude-haiku-4-5-20251001',
   },
   
   // S3/MinIO
